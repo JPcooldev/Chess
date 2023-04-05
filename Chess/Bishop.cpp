@@ -10,7 +10,22 @@
 Bishop::Bishop(Color color) : Piece(BISHOP, color)
 {}
 
-bool Bishop::isValidMove()
+bool Bishop::isValidMove(const Chessboard &board, const std::pair<int, int> &squareFrom, const std::pair<int, int> &squareTo) const
 {
-    return 1;
+    //checks if it is a diagonal move
+    if (board.isDiagonalMove(squareFrom, squareTo))
+    {
+        //fails if the path is not clear
+        if ( ! board.isPathFree(squareFrom, squareTo))
+            return false;
+        
+        //fails if squareTo holds piece from players team
+        if (board.isSameColor(squareFrom, squareTo))
+            return false;
+        
+        return true;
+    }
+    else
+        return false;
 }
+

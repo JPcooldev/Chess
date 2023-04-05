@@ -12,9 +12,9 @@
 #include "typedef.h"
 
 #include <array>
+#include <vector>
 #include <memory>
 #include <utility>
-#include <vector>
 
 const unsigned int boardSize = 8;
 
@@ -24,7 +24,7 @@ class Pawn;
 class Chessboard {
     //posibility to do this by std::map<std::pair<int, int>, pointer to an Piece object>
     std::array<std::array<std::unique_ptr<Piece>, boardSize>, boardSize> board; //{nullptr}; vyzkouset alternativa createBoard
-    std::vector<Piece> captures;
+    std::array<std::vector<std::unique_ptr<Piece>>, 2> captures; //first vector for WHITE captures, second for BLACK captures
     
 private:
     //fills board with nullptr
@@ -55,9 +55,13 @@ public:
     bool isSameColor(const std::pair<int, int> &squareFrom, const std::pair<int, int> &squareTo) const;
     bool isDifferentColor(const std::pair<int, int> &squareFrom, const std::pair<int, int> &squareTo) const;
     bool isOccupied(const std::pair<int, int> &square) const;
+    bool isPathFree(const std::pair<int, int> &squareFrom, const std::pair<int, int> &squareTo) const;
+    int getMoveLength(const std::pair<int, int> &squareFrom, const std::pair<int, int> &squareTo) const;
     const std::unique_ptr<Piece>& getPiece(const std::pair<int, int> &square) const;
     
     bool movePiece(const std::pair<int, int> &squareFrom, const std::pair<int, int> &squareTo);
+    
+    //std::vector<std::pair<int, int>> showPossibleMoves(const std::pair<int, int> &square);
     
     void printBoard() const;
 };

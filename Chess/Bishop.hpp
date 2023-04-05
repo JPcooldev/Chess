@@ -16,7 +16,7 @@ public:
     Bishop(Color color);
     ~Bishop() override = default;
     
-    bool isValidMove() override;
+    bool isValidMove(const Chessboard &board, const std::pair<int, int> &squareFrom, const std::pair<int, int> &squareTo) const override;
 };
 
 #endif /* Bishop_hpp */

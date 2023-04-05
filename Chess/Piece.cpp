@@ -7,7 +7,7 @@
 
 #include "Piece.hpp"
 
-Piece::Piece(Type type, Color color) : m_type(type), m_color(color)
+Piece::Piece(Type type, Color color) : m_type(type), m_color(color), m_moved(false)
 {}
 
 Color Piece::getColor() const { 
@@ -16,4 +16,14 @@ Color Piece::getColor() const {
 
 Type Piece::getType() const {
     return m_type;
+}
+
+bool Piece::isMoved() const
+{
+    return m_moved;
+}
+
+void Piece::setMoved(bool moved)
+{
+    m_moved = moved;
 }

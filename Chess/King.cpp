@@ -10,7 +10,7 @@
 King::King(Color color) : Piece(KING, color)
 {}
 
-bool King::isValidMove()
+bool King::isValidMove(const Chessboard &board, const std::pair<int, int> &squareFrom, const std::pair<int, int> &squareTo) const
 {
-    return 1;
+    return true;
 }

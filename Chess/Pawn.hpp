@@ -16,7 +16,7 @@ public:
     Pawn(Color color);
     ~Pawn() override = default;
     
-    bool isValidMove() override;
+    bool isValidMove(const Chessboard &board, const std::pair<int, int> &squareFrom, const std::pair<int, int> &squareTo) const override;
 };
 
 #endif /* Pawn_hpp */

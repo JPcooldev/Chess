@@ -26,6 +26,7 @@
 
 #include <utility>
 #include <iostream>
+#include <memory>
 
 Chessboard::Chessboard()
 {
@@ -87,15 +88,15 @@ void Chessboard::createBishops() {
 }
 
 void Chessboard::createQueens() {
-    placeOnBoard(std::make_pair(7, 7), std::make_unique<Queen>(WHITE));
+    placeOnBoard(std::make_pair(7, 3), std::make_unique<Queen>(WHITE));
     
-    placeOnBoard(std::make_pair(0, 7), std::make_unique<Queen>(BLACK));
+    placeOnBoard(std::make_pair(0, 3), std::make_unique<Queen>(BLACK));
 }
 
 void Chessboard::createKings() {
-    placeOnBoard(std::make_pair(7, 7), std::make_unique<King>(WHITE));
+    placeOnBoard(std::make_pair(7, 4), std::make_unique<King>(WHITE));
     
-    placeOnBoard(std::make_pair(0, 7), std::make_unique<King>(BLACK));
+    placeOnBoard(std::make_pair(0, 4), std::make_unique<King>(BLACK));
 }
 
 //fills board with nullptr
@@ -116,9 +117,9 @@ void Chessboard::placeOnBoard(const std::pair<int, int>& squareStart, std::uniqu
 bool Chessboard::isForwardMove(const std::pair<int, int> &squareFrom, const std::pair<int, int> &squareTo) const
 {
     Color color = board.at(squareFrom.first).at(squareFrom.second)->getColor();
-    if (color == WHITE && squareFrom.second > squareTo.second)
+    if (color == WHITE && squareFrom.first > squareTo.first)
         return true;
-    else if (color == BLACK && squareFrom.second < squareTo.second)
+    else if (color == BLACK && squareFrom.first < squareTo.first)
         return true;
     else
         return false;
@@ -188,7 +189,95 @@ bool Chessboard::isOccupied(const std::pair<int, int>& square) const
         return true;
 }
 
-//returns a piece from board
+//checks if path is clear, some pieces cannot jump over
+bool Chessboard::isPathFree(const std::pair<int, int> &squareFrom, const std::pair<int, int> &squareTo) const
+{
+    //for horizontal move
+    if (isHorizontalMove(squareFrom, squareTo))
+    {
+        //evaluating due to dirrection in for loop
+        if (squareFrom.second >= squareTo.second)
+        {
+            for (int i = squareFrom.second; i > squareTo.second; i--)
+                if (isOccupied(std::make_pair(squareFrom.first, i)))
+                    return false;
+            return true;
+        }
+        else
+        {
+            for (int i = squareFrom.second; i < squareTo.second; i++)
+                if (isOccupied(std::make_pair(squareFrom.first, i)))
+                    return false;
+            return true;
+        }
+    }
+    //for vertical move
+    else if (isVerticalMove(squareFrom, squareTo))
+    {
+        if (squareFrom.first >= squareTo.first)
+        {
+            for (int i = squareFrom.first; i > squareTo.first; i--)
+                if (isOccupied(std::make_pair(i, squareFrom.second)))
+                    return false;
+            return true;
+        }
+        else
+        {
+            for (int i = squareFrom.first; i < squareTo.first; i++)
+                if (isOccupied(std::make_pair(i, squareFrom.second)))
+                    return false;
+            return true;
+        }
+    }
+    //for diagonal move
+    else if (isDiagonalMove(squareFrom, squareTo))
+    {
+        bool movingUp, movingLeft;
+        movingUp = squareFrom.first >= squareTo.first ? true : false;
+        movingLeft = squareFrom.second >= squareTo.second ? true : false;
+        
+        int len = getMoveLength(squareFrom, squareTo);
+        int i = 1;
+        int j = 1;
+        
+        while (len)
+        {
+            if (movingUp)
+                i *= -1;
+            if (movingLeft)
+                j *= -1;
+            
+            if (isOccupied(std::make_pair(squareFrom.first + i, squareFrom.second + j)))
+                return false;
+            
+            if (movingUp)
+                i *= -1;
+            if (movingLeft)
+                j *= -1;
+            
+            i++;
+            j++;
+            len--;
+        }
+        return true;
+    }
+    
+    return false;
+}
+
+//returns move length
+int Chessboard::getMoveLength(const std::pair<int, int> &squareFrom, const std::pair<int, int> &squareTo) const
+{
+    if (isVerticalMove(squareFrom, squareTo) || isDiagonalMove(squareFrom, squareTo))
+        return abs(squareFrom.first - squareTo.first);
+    else if (isHorizontalMove(squareFrom, squareTo))
+        return abs(squareFrom.second - squareTo.second);
+    else
+        return -1;
+    
+}
+
+//returns a piece from board (for reading)
 const std::unique_ptr<Piece>& Chessboard::getPiece(const std::pair<int, int> &square) const
 {
     return board.at(square.first).at(square.second);
@@ -197,21 +286,52 @@ const std::unique_ptr<Piece>& Chessboard::getPiece(const std::pair<int, int> &sq
 //
 bool Chessboard::movePiece(const std::pair<int, int> &squareFrom, const std::pair<int, int> &squareTo)
 {
-    return 1;
+    std::unique_ptr<Piece> remainderFromMove = setPieceOnSquare(squareFrom, squareTo);
+    if (remainderFromMove != nullptr)
+    {
+        if (remainderFromMove->getColor() == WHITE)
+            captures.at(0).emplace_back(std::move(remainderFromMove));
+        else
+            captures.at(1).emplace_back(std::move(remainderFromMove));
+    }
+    return true;
 }
 
-void setPieceOnSquare(const std::pair<int, int>& squareFrom, const std::pair<int, int>& squareTo)
+std::unique_ptr<Piece> Chessboard::setPieceOnSquare(const std::pair<int, int> &squareFrom, const std::pair<int, int> &squareTo)
 {
+    //piece (to captures) or nullptr from squareTo, which we will return
+    std::unique_ptr<Piece> old = std::move(board.at(squareTo.first).at(squareTo.second));
     
+    //move piece
+    board.at(squareTo.first).at(squareTo.second) = std::move(board.at(squareFrom.first).at(squareFrom.second));
+    
+    //set squareFrom as empty
+    board.at(squareFrom.first).at(squareFrom.second).reset(nullptr);
+    
+    return old;
 }
+
+/*
+//TEMPORARY
+std::vector<std::pair<int, int>> Chessboard::showPossibleMoves(const std::pair<int, int> &square)
+{
+    return std::vector<std::pair<int, int>> {0};
+}
+ */
 
 //prints board
 void Chessboard::printBoard() const
 {
+    int i = 1;
     for (const auto &row : board)
+    {
+        std::cout << i << "  ";
         for (const auto &square : row)
             std::cout << getTypeToPrint(square) << " ";
-    std::cout << std::endl;
+        std::cout << std::endl;
+        i++;
+    }
+    std::cout << "   a  b  c  d  e  f  g  h\n" << std::endl;
 }
 
 //prints specific string depending on what's on square

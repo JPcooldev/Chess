@@ -16,7 +16,7 @@ public:
     Knight(Color color);
     ~Knight() override = default;
     
-    bool isValidMove() override;
+    bool isValidMove(const Chessboard &board, const std::pair<int, int> &squareFrom, const std::pair<int, int> &squareTo) const override;
 };
 
 #endif /* Knight_hpp */

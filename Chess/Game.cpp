@@ -18,10 +18,12 @@ void Game::run()
     int moveCounter = 1;
     Color turn = whoTurn(moveCounter);
     
-    std::cout << "Welcome in CHESS GAME\n";
+    std::cout << "Welcome to CHESS GAME\n\n";
     
     while (true)
     {
+        /*TO TEST FUNCTIONALITY
+         
         //determines if player is in checkmate
         if (isInCheckMate(turn))
         {
@@ -34,11 +36,13 @@ void Game::run()
             std::cout << turn << " is in stalemate. It is a draw.\n";
             break;
         }
+         
+        */
         
         print();
         
         //user puts input (e.g "a4 a5" or "a4 command")
-        std::cout << turn << "'s turn\n";
+        std::cout << turnToString(turn) << "'s turn\n";
         std::cout << "Enter move: ";
         std::string input {};
         std::getline(std::cin, input);
@@ -54,21 +58,50 @@ void Game::run()
         splitStringBySpace(input, coordinatesStr);
         
         std::pair<int, int> coordsFrom {textToCoordinates(coordinatesStr.at(0))};
+        std::pair<int, int> coordsTo {textToCoordinates(coordinatesStr.at(1))};
         
-        //checks if player chose his piece
-        if (isRightTurn(coordsFrom)) {
-            std::cout << "Invalid move. It is " << turn << "'s turn\n";
+        //checks if coordinates are on the board
+        if ( ! (chessboard.isOnBoard(coordsFrom)) || ! (chessboard.isOnBoard(coordsTo)) )
+        {
+            std::cout << "Off the board. Invalid move\n";
             continue;
         }
         
+        //checks if player chose no-empty square and if so, if he chose his piece
+        if ( ! isRightTurn(coordsFrom, turn) )
+        {
+            std::cout << "Invalid move\n";
+            continue;
+        }
         
+        /*
+        //checks if player wants help
+        if (coordinatesStr.at(1) == "help")
+        {
+            help(coordsFrom);
+        }
+        */
         
+        //TO TEST FUNCTIONALITY
+        
+        move(coordsFrom, coordsTo);
+        
+        moveCounter++;
+        turn = whoTurn(moveCounter);
     }
 }
 
-void Game::move() {
-    ;
+bool Game::move(const std::pair<int, int> &squareFrom, const std::pair<int, int> &squareTo)
+{
+    return chessboard.movePiece(squareFrom, squareTo);
 }
+
+/*
+std::vector<std::pair<int, int>> Game::help(const std::pair<int, int> &square)
+{
+    return chessboard.showPossibleMoves(square);
+}
+ */
 
 void Game::castle() {
     ;
@@ -111,8 +144,8 @@ void Game::splitStringBySpace(const std::string& input, std::vector<std::string>
 //converts text coordinates into board indexes
 std::pair<int, int> Game::textToCoordinates(const std::string &textCoord)
 {
-    int x = textCoord[0] - 'a';
-    int y = textCoord[1] - '0';
+    int y = textCoord[0] - 'a';
+    int x = textCoord[1] - '1';
     return {x, y};
 }
 
@@ -122,11 +155,17 @@ void Game::print()
 }
 
 //checks if player wants to move with his piece
-bool Game::isRightTurn(const std::pair<int, int> &coord) {
+bool Game::isRightTurn(const std::pair<int, int> &coord, Color turn)
+{
     if (chessboard.isOccupied(coord))
-        return 1;
+        return chessboard.getPiece(coord)->getColor() == turn;
     else
         return false;
+}
+
+std::string Game::turnToString(Color color)
+{
+    return (color == WHITE ? "WHITE" : "BLACK");
 }
 
 

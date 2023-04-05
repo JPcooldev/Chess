@@ -18,8 +18,9 @@ public:
     ~Game() = default;
     
     void run();
-    void move();
-    void showPosiibleMoves();
+//private:
+    bool move(const std::pair<int, int> &squareFrom, const std::pair<int, int> &squareTo);
+    //std::vector<std::pair<int, int>> help(const std::pair<int, int> &square);
     void castle();
     
     void print();
@@ -28,8 +29,9 @@ private:
     bool isInCheckMate(Color color) const;
     bool isInStalemate(Color color) const;
     Color whoTurn(int moveCount);
-    bool isRightTurn(const std::pair<int, int> &coord);
+    bool isRightTurn(const std::pair<int, int> &coord, Color turn);
     
+    std::string turnToString(Color color);
     
     void splitStringBySpace(const std::string &input, std::vector<std::string> &tmp);
     std::pair<int, int> textToCoordinates(const std::string &textCoord);
