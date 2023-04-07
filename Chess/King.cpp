@@ -12,5 +12,9 @@ King::King(Color color) : Piece(KING, color)
 
 bool King::isValidMove(const Chessboard &board, const std::pair<int, int> &squareFrom, const std::pair<int, int> &squareTo) const
 {
-    return true;
+    //king cannot move to the square occupied by his team
+    if (board.isSameColor(squareFrom, squareTo))
+        return false;
+    else
+        return true;
 }
