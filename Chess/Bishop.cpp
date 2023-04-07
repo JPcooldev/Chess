@@ -19,7 +19,7 @@ bool Bishop::isValidMove(const Chessboard &board, const std::pair<int, int> &squ
         if ( ! board.isPathFree(squareFrom, squareTo))
             return false;
         
-        //fails if squareTo holds piece from players team
+        //fails if squareTo is occupied by piece from player's team
         if (board.isSameColor(squareFrom, squareTo))
             return false;
         
