@@ -22,36 +22,47 @@ void Game::run()
     
     while (true)
     {
-        /*TO TEST FUNCTIONALITY
-         
-        //determines if player is in checkmate
+        
+        // determines if player is in checkmate
         if (isInCheckMate(turn))
         {
-            std::cout << turn << " is in checkmate. Game over.\n";
+            std::cout << whoTurnDisplay(turn) << " is in checkmate. Game over.\n";
             break;
         }
         
         //determines if player is in stalemate
         if (isInStalemate(turn)) {
-            std::cout << turn << " is in stalemate. It is a draw.\n";
+            std::cout << whoTurnDisplay(turn) << " is in stalemate. It is a draw.\n";
             break;
         }
-         
-        */
+        
         
         print();
         
-        //user puts input (e.g "a4 a5" or "a4 command")
-        std::cout << turnToString(turn) << "'s turn\n";
+        // INPUT SECTION
+        // user puts input (e.g "a4 a5" or "a4 command")
+        std::cout << whoTurnDisplay(turn) << "'s turn\n";
         std::cout << "Enter move: ";
         std::string input {};
         std::getline(std::cin, input);
         
-        //checks for non-move commands
+        // checks for non-move commands
         if (input == "exit")
         {
             std::cout << "Game over\n";
             break;
+        }
+        else if (input == "revert")
+        {
+            m_chessboard.revertLastMove();
+            moveCounter++;
+            turn = whoTurn(moveCounter);
+            continue;
+        }
+        else if (input == "captures")
+        {
+            m_chessboard.printCaptures();
+            continue;
         }
         
         std::vector<std::string> coordinatesStr {};
@@ -60,41 +71,37 @@ void Game::run()
         std::pair<int, int> coordsFrom {textToCoordinates(coordinatesStr.at(0))};
         std::pair<int, int> coordsTo {textToCoordinates(coordinatesStr.at(1))};
         
-        //checks if coordinates are on the board
-        if ( ! (chessboard.isOnBoard(coordsFrom)) || ! (chessboard.isOnBoard(coordsTo)) )
-        {
-            std::cout << "Off the board. Invalid move\n";
-            continue;
-        }
-        
-        //checks if player chose no-empty square and if so, if he chose his piece
+        // CHECK INPUT
+        // check if player chose occupied square (square with piece) and if so, if he chose his piece
         if ( ! isRightTurn(coordsFrom, turn) )
         {
             std::cout << "Invalid move\n";
             continue;
         }
         
-        /*
-        //checks if player wants help
-        if (coordinatesStr.at(1) == "help")
+        // checks is move is valid, oherwise player will move again
+        if ( m_chessboard.movePiece(coordsFrom, coordsTo) )
         {
-            help(coordsFrom);
+            if ( isInCheck(turn))
+            {
+                std::cout << "Invalid move: This leaves " << whoTurnDisplay(turn) << " in check\n";
+                m_chessboard.revertLastMove();
+                continue;
+            }
+            else
+            {
+                moveCounter++;
+                turn = whoTurn(moveCounter);
+            }
         }
-        */
-        
-        //TO TEST FUNCTIONALITY
-        
-        move(coordsFrom, coordsTo);
-        
-        moveCounter++;
-        turn = whoTurn(moveCounter);
+        else
+        {
+            std::cout << "Invalid move\n";
+            continue;
+        }
     }
 }
 
-bool Game::move(const std::pair<int, int> &squareFrom, const std::pair<int, int> &squareTo)
-{
-    return chessboard.movePiece(squareFrom, squareTo);
-}
 
 /*
 std::vector<std::pair<int, int>> Game::help(const std::pair<int, int> &square)
@@ -107,19 +114,99 @@ void Game::castle() {
     ;
 }
 
-bool Game::isInCheck(Color color) const
+// determones if player get himself into check by his move
+bool Game::isInCheck(Color defendingColor) const
 {
-    return 1;
+    Color attackingColor {};
+    if (defendingColor == WHITE)
+        attackingColor = BLACK;
+    else
+        attackingColor = WHITE;
+    
+    std::pair<int, int> kingLoc = m_chessboard.getKingsLocation(defendingColor);
+    std::vector<std::pair<int, int>> attackLocations = m_chessboard.getPiecesLocations(attackingColor);
+    
+    // check if attacking's piece can attack player's king
+    for (auto &attackPiece : attackLocations)
+    {
+        if (m_chessboard.isValidMove(attackPiece, kingLoc))
+            return true;
+    }
+    return false;
 }
 
-bool Game::isInCheckMate(Color color) const
+// is in check and has no legal moves
+bool Game::isInCheckMate(Color defendingColor)
 {
-    return 1;
+    if (isInCheck(defendingColor))
+    {
+        //auto& board = m_chessboard.getBoard();
+        
+        // get all defending's pieces and try all their possible moves, if one can stop king from being in check => no checkmate
+        for (const auto &pieceLoc : m_chessboard.getPiecesLocations(defendingColor))
+        {
+            // trying all moves for defending's pieces
+            for (int row = 0; row < boardSize; row++)
+            {
+                for (int square = 0; square < boardSize; square++)
+                {
+                    std::pair<int, int> locationToMove = std::make_pair(row, square);
+                    if ( m_chessboard.movePiece(pieceLoc, locationToMove) )
+                    {
+                        // player is no longer in check, so there exists possible move
+                        if ( ! isInCheck(defendingColor))
+                        {
+                            m_chessboard.revertLastMove();
+                            return false;
+                        }
+                        // move did not help with defending check so it must be reverted
+                        m_chessboard.revertLastMove();
+                    }
+                }
+            }
+        }
+        // no move is possible to defend checkmate => end
+        return true;
+    }
+    else
+        return false;
 }
 
-bool Game::isInStalemate(Color color) const
+// is not in check and there are no legal moves
+bool Game::isInStalemate(Color defendingColor)
 {
-    return 1;
+    if ( isInCheck(defendingColor) )
+        return false;
+    else
+    {
+        //auto& board = m_chessboard.getBoard();
+        
+        // get all defending's pieces and try all their possible moves, if one can stop king from being in check => no checkmate
+        for (const auto &pieceLoc : m_chessboard.getPiecesLocations(defendingColor))
+        {
+            // trying all moves for defending's pieces
+            for (int row = 0; row < boardSize; row++)
+            {
+                for (int square = 0; square < boardSize; square++)
+                {
+                    std::pair<int, int> locationToMove = std::make_pair(row, square);
+                    if ( m_chessboard.movePiece(pieceLoc, locationToMove) )
+                    {
+                        // player find a move which does not put him in check => no stalemate
+                        if ( ! isInCheck(defendingColor))
+                        {
+                            m_chessboard.revertLastMove();
+                            return false;
+                        }
+                        // move put player into check, it must be reverted
+                        m_chessboard.revertLastMove();
+                    }
+                }
+            }
+        }
+    }
+    // all possible moves put player into check => stalemate
+    return true;
 }
 
 //returns who's turn it is
@@ -151,19 +238,19 @@ std::pair<int, int> Game::textToCoordinates(const std::string &textCoord)
 
 void Game::print()
 {
-    chessboard.printBoard();
+    m_chessboard.printBoard();
 }
 
 //checks if player wants to move with his piece
 bool Game::isRightTurn(const std::pair<int, int> &coord, Color turn)
 {
-    if (chessboard.isOccupied(coord))
-        return chessboard.getPiece(coord)->getColor() == turn;
+    if (m_chessboard.isOccupied(coord))
+        return m_chessboard.getPiece(coord)->getColor() == turn;
     else
         return false;
 }
 
-std::string Game::turnToString(Color color)
+std::string Game::whoTurnDisplay(Color color)
 {
     return (color == WHITE ? "WHITE" : "BLACK");
 }

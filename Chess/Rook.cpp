@@ -15,7 +15,7 @@ bool Rook::isValidMove(const Chessboard &board, const std::pair<int, int> &squar
     //rook can only move in horizontal or vertical directiion
     if (board.isHorizontalMove(squareFrom, squareTo) || board.isVerticalMove(squareFrom, squareTo))
     {
-        //fails if thr path is not clear
+        //fails if the path is not clear
         if ( ! board.isPathFree(squareFrom, squareTo))
             return false;
         

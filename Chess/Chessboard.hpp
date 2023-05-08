@@ -19,12 +19,14 @@
 const unsigned int boardSize = 8;
 
 class Piece;
-class Pawn;
 
 class Chessboard {
     //posibility to do this by std::map<std::pair<int, int>, pointer to an Piece object>
-    std::array<std::array<std::unique_ptr<Piece>, boardSize>, boardSize> board; //{nullptr}; vyzkouset alternativa createBoard
-    std::array<std::vector<std::unique_ptr<Piece>>, 2> captures; //first vector for WHITE captures, second for BLACK captures
+    std::array<std::array<std::unique_ptr<Piece>, boardSize>, boardSize> m_board; //{nullptr}; vyzkouset alternativa createBoard
+    
+    // captures hold captured Piece and its location from which it's been captured (for reverting reason)
+    std::vector<std::pair<std::unique_ptr<Piece>,std::pair<int, int>>> m_captures;
+    std::vector<std::pair<std::pair<int, int>, std::pair<int, int>>> m_moves;
     
 private:
     //fills board with nullptr
@@ -56,14 +58,25 @@ public:
     bool isDifferentColor(const std::pair<int, int> &squareFrom, const std::pair<int, int> &squareTo) const;
     bool isOccupied(const std::pair<int, int> &square) const;
     bool isPathFree(const std::pair<int, int> &squareFrom, const std::pair<int, int> &squareTo) const;
-    int getMoveLength(const std::pair<int, int> &squareFrom, const std::pair<int, int> &squareTo) const;
-    const std::unique_ptr<Piece>& getPiece(const std::pair<int, int> &square) const;
+    bool isValidMove(const std::pair<int, int> &squareFrom, const std::pair<int, int> &squareTo) const;
     
+    int getMoveLength(const std::pair<int, int> &squareFrom, const std::pair<int, int> &squareTo) const;
+    std::vector<std::pair<int,int>> getPiecesLocations(Color color) const;
+    std::pair<int,int> getKingsLocation(Color color) const;
+    const std::unique_ptr<Piece>& getPiece(const std::pair<int, int> &square) const;
+    //std::array<std::array<std::unique_ptr<Piece>, boardSize>, boardSize>& getBoard();
+    
+    void revertLastMove();
     bool movePiece(const std::pair<int, int> &squareFrom, const std::pair<int, int> &squareTo);
     
     //std::vector<std::pair<int, int>> showPossibleMoves(const std::pair<int, int> &square);
     
     void printBoard() const;
+    void printCaptures() const;
+    void printMoves() const;
+    std::string colorToString(Color color) const;
+    std::string typeToString(Type type) const;
+    char typeToChar(Type type) const;
 };
 
 #endif /* Chessboard_hpp */

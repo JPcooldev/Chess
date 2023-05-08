@@ -12,18 +12,19 @@ Queen::Queen(Color color) : Piece(QUEEN, color)
 
 bool Queen::isValidMove(const Chessboard &board, const std::pair<int, int> &squareFrom, const std::pair<int, int> &squareTo) const
 {
+    // move must be horizontal, vertical or diagonal
     if (board.isHorizontalMove(squareFrom, squareTo) || board.isVerticalMove(squareFrom, squareTo) || board.isDiagonalMove(squareFrom, squareTo))
     {
-        //fails if the path is not clear
-        if ( ! board.isPathFree(squareFrom, squareTo))
-            return false;
-        
-        //fails if squareTo is occupied by piece from player's team
-        if (board.isSameColor(squareFrom, squareTo))
-            return false;
-        
-        return true;
+        // path must be free
+        if (board.isPathFree(squareFrom, squareTo))
+        {
+            // destinaton must be empty or opponent's piece
+            if (board.isOccupied(squareTo) && board.isSameColor(squareFrom, squareTo))
+                return false;
+            
+            return true;
+        }
     }
-    else
-        return false;
+    
+    return false;
 }
