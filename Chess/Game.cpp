@@ -232,7 +232,7 @@ void Game::splitStringBySpace(const std::string& input, std::vector<std::string>
 std::pair<int, int> Game::textToCoordinates(const std::string &textCoord)
 {
     int y = textCoord[0] - 'a';
-    int x = textCoord[1] - '1';
+    int x = '8' - textCoord[1];
     return {x, y};
 }
 

@@ -341,7 +341,7 @@ std::vector<std::pair<int, int>> Chessboard::showPossibleMoves(const std::pair<i
 //prints board
 void Chessboard::printBoard() const
 {
-    int i = 1;
+    int i = 8;
     std::cout << std::endl;
     for (const auto &row : m_board)
     {
@@ -349,7 +349,7 @@ void Chessboard::printBoard() const
         for (const auto &square : row)
             std::cout << getTypeToPrint(square) << " ";
         std::cout << std::endl;
-        i++;
+        i--;
     }
     std::cout << "   a  b  c  d  e  f  g  h\n" << std::endl;
 }
