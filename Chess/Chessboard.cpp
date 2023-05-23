@@ -384,6 +384,25 @@ std::string Chessboard::getTypeToPrint(const std::unique_ptr<Piece> &square) con
     
 }
 
+// return possible moves for given piece
+std::vector<std::pair<int, int>> Chessboard::getPossibleMoves(const std::pair<int, int> &squareFrom)
+{
+    std::vector<std::pair<int, int>> locations {};
+    
+    for (int row = 0; row < m_board.size(); row++)
+    {
+        for (int square = 0; square < m_board[row].size(); square++)
+        {
+            std::pair<int, int> location { std::make_pair(row, square) };
+            if (isValidMove(squareFrom, location))
+            {
+                locations.emplace_back(location);
+            }
+        }
+    }
+    return locations;
+}
+
 // return location on color's pieces which are on board
 std::vector<std::pair<int,int>> Chessboard::getPiecesLocations(Color color) const
 {

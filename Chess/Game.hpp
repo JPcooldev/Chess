@@ -18,6 +18,7 @@ public:
     ~Game() = default;
     
     void run();
+    std::vector<std::pair<int, int>> getHelp(const std::pair<int, int> &square);
 private:
     //std::vector<std::pair<int, int>> help(const std::pair<int, int> &square);
     void castle();

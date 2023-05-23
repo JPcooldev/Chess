@@ -255,8 +255,10 @@ std::string Game::whoTurnDisplay(Color color)
     return (color == WHITE ? "WHITE" : "BLACK");
 }
 
-
-
+std::vector<std::pair<int, int>> Game::getHelp(const std::pair<int, int> &square)
+{
+    return m_chessboard.getPossibleMoves(square);
+}
 
 
 

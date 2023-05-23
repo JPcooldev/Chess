@@ -64,6 +64,7 @@ public:
     std::vector<std::pair<int,int>> getPiecesLocations(Color color) const;
     std::pair<int,int> getKingsLocation(Color color) const;
     const std::unique_ptr<Piece>& getPiece(const std::pair<int, int> &square) const;
+    std::vector<std::pair<int, int>> getPossibleMoves(const std::pair<int, int> &square);
     //std::array<std::array<std::unique_ptr<Piece>, boardSize>, boardSize>& getBoard();
     
     void revertLastMove();
