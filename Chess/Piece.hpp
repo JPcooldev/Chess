@@ -19,7 +19,7 @@ class Chessboard;
 class Piece {
     Color m_color;
     Type m_type;
-    bool m_moved;
+    unsigned int m_moves;
     
 public:
     Piece(Type type, Color color);
@@ -30,8 +30,8 @@ public:
     
     Color getColor() const;
     Type getType() const;
-    bool isMoved() const;
-    void setMoved(bool moved);
+    unsigned int getMoves() const;
+    void setMoves(int moves);
 };
 
 #endif /* Piece_hpp */

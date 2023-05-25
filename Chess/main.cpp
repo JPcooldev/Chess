@@ -12,9 +12,6 @@
 int main() {
     
     Game game;
-    //game.print();
-    //game.move(std::make_pair(7, 2), std::make_pair(4, 2));
-    //game.print();
     game.run();
     
     

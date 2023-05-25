@@ -11,27 +11,28 @@
 #include "Chessboard.hpp"
 
 class Game {
-    Chessboard chessboard;
+    Chessboard m_chessboard;
     
 public:
     Game() = default;
     ~Game() = default;
     
     void run();
-//private:
-    bool move(const std::pair<int, int> &squareFrom, const std::pair<int, int> &squareTo);
+    std::vector<std::pair<int, int>> getHelp(const std::pair<int, int> &square);
+private:
     //std::vector<std::pair<int, int>> help(const std::pair<int, int> &square);
     void castle();
     
     void print();
-private:
     bool isInCheck(Color color) const;
-    bool isInCheckMate(Color color) const;
-    bool isInStalemate(Color color) const;
+    bool isInCheckMate(Color color);
+    bool isInStalemate(Color color);
     Color whoTurn(int moveCount);
     bool isRightTurn(const std::pair<int, int> &coord, Color turn);
     
-    std::string turnToString(Color color);
+    //bool isCheckSimulation(std::pair<int, int> &kingLocation, )
+    
+    std::string whoTurnDisplay(Color color);
     
     void splitStringBySpace(const std::string &input, std::vector<std::string> &tmp);
     std::pair<int, int> textToCoordinates(const std::string &textCoord);
